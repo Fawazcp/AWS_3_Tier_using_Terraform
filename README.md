@@ -441,4 +441,159 @@ terraform apply -auto-approve
 
 - Next, we need to create second security group for the public instances in the web tier
 
+```
+# add the below resouces inthe same file
+
+resource "aws_security_group" "WebTierSG" {
+  name        = "webtier-security-group"
+  description = "Security group for web tier"
+  vpc_id      = aws_vpc.my_vpc.id
+  tags = {
+    Name = "WebTierSG"
+  }
+}
+
+resource "aws_security_group_rule" "WebTierSG_ingress" {
+  security_group_id = aws_security_group.WebTierSG.id
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["your_ip/32"]
+}
+
+resource "aws_security_group_rule" "traffic_from_internet_facing-lb-sg" {
+  security_group_id        = aws_security_group.WebTierSG.id
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.internet_facing_lb_sg.id
+}
+```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+- Next, we need to create sg for our internal load balancer.
+
+```
+# add the below resouces inthe same file
+
+resource "aws_security_group" "internal-lb-sg" {
+  name        = "internal-lb-sg"
+  description = "Security group for internal lb"
+  vpc_id      = aws_vpc.my_vpc.id
+  tags = {
+    Name = "internal-lb-sg"
+  }
+}
+
+resource "aws_security_group_rule" "traffic_to_internal_facing-lb-sg" {
+  security_group_id        = aws_security_group.internal-lb-sg.id
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.WebTierSG.id
+}
+
+```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+Next we’ll configure SG for our private instances. After typing a name and description, add an inbound rule that will allow TCP type traffic on port 4000 from the internal load balancer security group you created in the previous step. This is the port our app tier application is running on and allows our internal load balancer to forward traffic on this port to our private instances. You should also add another route for port 4000 that allows your IP for testing. Let’s see how to do that
+
+```
+# add the below resouces inthe same file
+
+resource "aws_security_group" "PrivateinstanceSG" {
+  name        = "PrivateinstanceSG"
+  description = "Security group for private app tier sg"
+  vpc_id      = aws_vpc.my_vpc.id
+  tags = {
+    Name = "PrivateinstanceSG"
+  }
+}
+
+resource "aws_security_group_rule" "PrivateinstanceSG_ingress" {
+  security_group_id = aws_security_group.PrivateinstanceSG.id
+  type              = "ingress"
+  from_port         = 4000
+  to_port           = 4000
+  protocol          = "tcp"
+  cidr_blocks       = ["your_ip/32"]
+}
+
+resource "aws_security_group_rule" "PrivateinstanceSG_rule" {
+  security_group_id        = aws_security_group.PrivateinstanceSG.id
+  type                     = "ingress"
+  from_port                = 4000
+  to_port                  = 4000
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.internal-lb-sg.id
+}
+```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+
+The next security group we’ll configure protects our private database instances. For this security group, add an inbound rule that will allow traffic from the private instance security group to the MYSQL/Aurora port (3306).
+
+```
+# add the below resouces inthe same file
+
+resource "aws_security_group" "database-sg" {
+  name        = "database-sg"
+  description = "Security group for databases"
+  vpc_id      = aws_vpc.my_vpc.id
+  tags = {
+    Name = "database-sg"
+  }
+}
+
+resource "aws_security_group_rule" "database-sg_rule" {
+  security_group_id        = aws_security_group.database-sg.id
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.PrivateinstanceSG.id
+}
+```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+- Go to AWS console under security groups must see the below sg
+
+![image](snapshots/12.png)
+
+
 
