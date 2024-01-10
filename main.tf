@@ -7,7 +7,16 @@ terraform {
   }
 
   required_version = ">= 1.2.0"
+
+  backend "remote" {
+    organization = "devopswithlasantha"
+
+    workspaces {
+      name = "3tierapptf-workspace"
+    }
+  }
 }
+
 
 provider "aws" {
   region = "us-east-2"
@@ -77,8 +86,8 @@ resource "aws_vpc" "aws-vpc" {
 
 # Subnets Creation
 resource "aws_subnet" "public-web-az1" {
-  vpc_id     = aws_vpc.aws-vpc.id
-  cidr_block = "10.0.0.0/24"
+  vpc_id            = aws_vpc.aws-vpc.id
+  cidr_block        = "10.0.0.0/24"
   availability_zone = "us-east-2a"
 
   tags = {
@@ -88,8 +97,8 @@ resource "aws_subnet" "public-web-az1" {
 }
 
 resource "aws_subnet" "public-web-az2" {
-  vpc_id     = aws_vpc.aws-vpc.id
-  cidr_block = "10.0.1.0/24"
+  vpc_id            = aws_vpc.aws-vpc.id
+  cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-2b"
 
   tags = {
@@ -99,8 +108,8 @@ resource "aws_subnet" "public-web-az2" {
 }
 
 resource "aws_subnet" "private-app-az1" {
-  vpc_id     = aws_vpc.aws-vpc.id
-  cidr_block = "10.0.2.0/24"
+  vpc_id            = aws_vpc.aws-vpc.id
+  cidr_block        = "10.0.2.0/24"
   availability_zone = "us-east-2a"
 
   tags = {
@@ -110,8 +119,8 @@ resource "aws_subnet" "private-app-az1" {
 }
 
 resource "aws_subnet" "private-app-az2" {
-  vpc_id     = aws_vpc.aws-vpc.id
-  cidr_block = "10.0.3.0/24"
+  vpc_id            = aws_vpc.aws-vpc.id
+  cidr_block        = "10.0.3.0/24"
   availability_zone = "us-east-2b"
 
   tags = {
@@ -121,8 +130,8 @@ resource "aws_subnet" "private-app-az2" {
 }
 
 resource "aws_subnet" "private-db-az1" {
-  vpc_id     = aws_vpc.aws-vpc.id
-  cidr_block = "10.0.4.0/24"
+  vpc_id            = aws_vpc.aws-vpc.id
+  cidr_block        = "10.0.4.0/24"
   availability_zone = "us-east-2a"
 
   tags = {
@@ -132,8 +141,8 @@ resource "aws_subnet" "private-db-az1" {
 }
 
 resource "aws_subnet" "private-db-az2" {
-  vpc_id     = aws_vpc.aws-vpc.id
-  cidr_block = "10.0.5.0/24"
+  vpc_id            = aws_vpc.aws-vpc.id
+  cidr_block        = "10.0.5.0/24"
   availability_zone = "us-east-2b"
 
   tags = {
