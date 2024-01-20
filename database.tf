@@ -1,5 +1,4 @@
-# Create a new file named database.tf and add the below resources to create the subnet group
-
+# Database Subnet Group
 resource "aws_db_subnet_group" "database_subnet_group" {
   name       = "database-subnet-group"
   subnet_ids = [aws_subnet.private-db-az1.id, aws_subnet.private-db-az2.id]
@@ -10,7 +9,6 @@ resource "aws_db_subnet_group" "database_subnet_group" {
 }
 
 # Aurora Mysql RDS With Read Replica
-
 resource "aws_rds_cluster" "cluster" {
   engine             = "aurora-mysql"
   engine_mode        = "provisioned"
@@ -18,7 +16,7 @@ resource "aws_rds_cluster" "cluster" {
   cluster_identifier = "aurora-database"
   master_username    = "admin"
   master_password    = "admin123"
-  database_name      = "threetierapp"
+  database_name      = "webappdb"
 
   db_subnet_group_name   = aws_db_subnet_group.database_subnet_group.name
   vpc_security_group_ids = [aws_security_group.database-sg.id]
