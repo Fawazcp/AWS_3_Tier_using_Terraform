@@ -9,6 +9,7 @@ resource "aws_instance" "app-tier" {
   user_data = <<-EOF
               #!/bin/bash
               sudo yum install mysql -y
+              sudo yum install -y amazon-ssm-agent
               curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
               source ~/.bashrc
               nvm install 16
@@ -27,4 +28,6 @@ resource "aws_instance" "app-tier" {
     Name = "App-Tier-EC2"
     Environment = "dev"
   }
+
+  depends_on = [aws_iam_instance_profile.ec2-profile]
 }
