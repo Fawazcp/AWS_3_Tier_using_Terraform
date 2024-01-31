@@ -34,8 +34,7 @@ resource "aws_iam_role_policy_attachment" "attach_policy2" {
 }
 
 resource "aws_iam_instance_profile" "ec2-profile" {
-  name = "three-tier-ec2-profile"
-  role = aws_iam_role.iamrole.name
-
+  name       = "three-tier-ec2-profile"
+  role       = aws_iam_role.iamrole.name
   depends_on = [aws_iam_role.iamrole]
 }

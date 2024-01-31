@@ -1,9 +1,9 @@
 # Define EC2 instance with IAM instance profile
 resource "aws_instance" "app-tier" {
-  ami           = "ami-0c2f3d2ee24929520"  # Replace with your desired AMI
-  instance_type = "t2.micro"
-  subnet_id              = aws_subnet.private-app-az1.id  # Specify the private app subnet ID
-  iam_instance_profile = aws_iam_instance_profile.ec2-profile.name
+  ami                    = "ami-085648d85db272f29" # Replace with your desired AMI
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.private-app-az1.id # Specify the private app subnet ID
+  iam_instance_profile   = aws_iam_instance_profile.ec2-profile.name
   vpc_security_group_ids = [aws_security_group.PrivateinstanceSG.id] # Reference the security group ID
 
   user_data = <<-EOF
@@ -25,7 +25,7 @@ resource "aws_instance" "app-tier" {
             EOF
 
   tags = {
-    Name = "App-Tier-EC2"
+    Name        = "App-Tier-EC2"
     Environment = "dev"
   }
 

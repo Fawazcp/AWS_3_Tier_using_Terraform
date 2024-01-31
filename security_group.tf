@@ -14,7 +14,7 @@ resource "aws_security_group_rule" "internet_facing_lb_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["2.49.237.41/32"]
+  cidr_blocks       = ["2.49.3.12/32"]
 }
 
 
@@ -35,7 +35,7 @@ resource "aws_security_group_rule" "WebTierSG_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["2.49.237.41/32"]
+  cidr_blocks       = ["2.49.3.12/32"]
 }
 
 resource "aws_security_group_rule" "traffic_from_internet_facing-lb-sg" {
@@ -84,7 +84,7 @@ resource "aws_security_group_rule" "PrivateinstanceSG_ingress" {
   from_port         = 4000
   to_port           = 4000
   protocol          = "tcp"
-  cidr_blocks       = ["2.49.237.41/32"]
+  cidr_blocks       = ["2.49.3.12/32"]
 }
 
 resource "aws_security_group_rule" "PrivateinstanceSG_rule" {
