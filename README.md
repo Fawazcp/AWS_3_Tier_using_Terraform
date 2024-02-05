@@ -683,7 +683,317 @@ terraform apply -auto-approve
 
 - wait for sometime and go RDS dashboard and we can see database has been created
 
+## Step 4
 
+### App Tier Deployment
 
+In order create app tier ec2 first.
+```
+# Create a new file named app_tier.tf and add the below resources
 
+# Define App Tier EC2 instance with IAM instance profile
+resource "aws_instance" "app-tier" {
+  ami                    = "ami-085648d85db272f29" # Replace with your desired AMI
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.private-app-az1.id # Specify the private app subnet ID
+  iam_instance_profile   = aws_iam_instance_profile.ec2-profile.name
+  vpc_security_group_ids = [aws_security_group.PrivateinstanceSG.id] # Reference the security group ID
 
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo yum install mysql -y
+              sudo yum install -y amazon-ssm-agent
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+              source ~/.bashrc
+              nvm install 16
+              nvm use 16
+              npm install -g pm2   
+              cd ~/
+              aws s3 cp s3://s3-bucket-for-3-tier-app/app-tier/ app-tier --recursive
+              cd ~/app-tier
+              npm install
+              pm2 start index.js
+              pm2 startup
+              pm2 save
+            EOF
+
+  tags = {
+    Name        = "App-Tier-EC2"
+    Environment = "dev"
+  }
+
+  depends_on = [aws_iam_instance_profile.ec2-profile]
+}
+```
+Configure Database.
+
+```
+Connect App Tier EC@ via Session Manager & Run following commands
+
+sudo yum install mysql -y
+mysql -h CHANGE-TO-YOUR-RDS-ENDPOINT -u CHANGE-TO-USER-NAME -p
+CREATE DATABASE webappdb;   
+SHOW DATABASES;
+USE webappdb;    
+
+CREATE TABLE IF NOT EXISTS transactions(id INT NOT NULL
+AUTO_INCREMENT, amount DECIMAL(10,2), description
+VARCHAR(100), PRIMARY KEY(id));    
+
+SHOW TABLES;    
+
+INSERT INTO transactions (amount,description) VALUES ('400','groceries');   
+
+SELECT * FROM transactions;
+
+```
+
+## Step 5
+
+### Create App Tier & Web Tier AMI
+
+```
+# Create a new file named ami.tf and add the below resources
+
+resource "aws_ami_from_instance" "apptier-ami" {
+  name               = "apptier-image"
+  source_instance_id = aws_instance.app-tier.id
+  depends_on         = [aws_instance.app-tier]
+}
+
+resource "aws_ami_from_instance" "webtier-ami" {
+  name               = "webtier-image"
+  source_instance_id = aws_instance.web-tier.id
+  depends_on         = [aws_instance.web-tier]
+}
+
+```
+
+## Step 6
+
+### Create Internal Load Balancer & Auto Scaling Group
+
+```
+# Create a new file named internal_lb_tg_asg.tf and add the below resources
+
+# AWS LB Target Group for Internal LB
+resource "aws_lb_target_group" "internal-lb-tg" {
+  name     = "internal-lb-tg"
+  port     = 4000
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.aws-vpc.id
+
+  health_check {
+    path = "/health"
+  }
+  depends_on = [aws_vpc.aws-vpc]
+}
+
+# AWS Load Balancer
+resource "aws_lb" "internal-lb" {
+  name               = "app-tier-internal-lb"
+  internal           = true
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.internal-lb-sg.id]
+  subnets            = [aws_subnet.private-app-az1.id, aws_subnet.private-app-az2.id]
+
+  tags = {
+    Environment = "dev"
+  }
+
+}
+
+resource "aws_lb_listener" "internal-lb-tg-listener" {
+  load_balancer_arn = aws_lb.internal-lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.internal-lb-tg.arn
+  }
+}
+
+# App Tier Launch Template
+resource "aws_launch_template" "app-tier-launch-template" {
+  name                   = "app-tier-launch-template"
+  description            = "App Tier Launch Template Description"
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.PrivateinstanceSG.id]
+  image_id               = aws_ami_from_instance.apptier-ami.id
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2-profile.name
+  }
+
+  depends_on = [
+    aws_iam_instance_profile.ec2-profile,
+    aws_security_group.PrivateinstanceSG,
+  ]
+
+}
+
+# App Tier Auto Scaling Group
+resource "aws_autoscaling_group" "app-tier-auto-scalling-group" {
+  name                      = "App-Tier-ASG"
+  max_size                  = 2
+  min_size                  = 2
+  health_check_grace_period = 300
+  health_check_type         = "ELB"
+  desired_capacity          = 2
+  force_delete              = true
+  vpc_zone_identifier       = [aws_subnet.private-app-az1.id, aws_subnet.private-app-az2.id]
+  #   load_balancers            = [aws_lb.internal-lb.id]
+  target_group_arns = [aws_lb_target_group.internal-lb-tg.arn]
+
+  launch_template {
+    id      = aws_launch_template.app-tier-launch-template.id
+    version = "$Latest"
+  }
+}
+
+```
+
+## Step 7
+
+### Web Tier Deployment
+
+```
+# Create a new file named web_tier.tf and add the below resources
+
+# Define Web Tier EC2 instance with IAM instance profile
+resource "aws_instance" "web-tier" {
+  ami                    = "ami-085648d85db272f29" # Replace with your desired AMI
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.public-web-az1.id # Specify the private app subnet ID
+  iam_instance_profile   = aws_iam_instance_profile.ec2-profile.name
+  vpc_security_group_ids = [aws_security_group.WebTierSG.id] # Reference the security group ID
+  associate_public_ip_address = true
+
+  user_data = <<-EOF
+              #!/bin/bash
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+              source ~/.bashrc
+              nvm install 16
+              nvm use 16
+              cd ~/
+              aws s3 cp s3://s3-bucket-for-3-tier-app/web-tier/ web-tier --recursive
+              cd ~/web-tier
+              npm install 
+              npm run build
+              sudo amazon-linux-extras install nginx1 -y
+              cd /etc/nginx
+              ls
+              sudo rm nginx.conf
+              sudo aws s3 cp s3://s3-bucket-for-3-tier-app/nginx.conf .
+              sudo service nginx restart
+              chmod -R 755 /home/ec2-user
+              sudo chkconfig nginx on
+            EOF
+
+  tags = {
+    Name        = "Web-Tier-EC2"
+    Environment = "dev"
+  }
+
+  depends_on = [aws_iam_instance_profile.ec2-profile]
+}
+
+```
+
+## Step 8
+
+### External Load Balancer & Auto Scaling Group
+
+```
+# Create a new file named external_lb_tg_asg.tf and add the below resources
+
+# AWS LB Target Group for External LB
+resource "aws_lb_target_group" "external-lb-tg" {
+  name     = "external-lb-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.aws-vpc.id
+
+  health_check {
+    path = "/health"
+  }
+  depends_on = [aws_vpc.aws-vpc]
+}
+
+# AWS Load Balancer
+resource "aws_lb" "external-lb" {
+  name               = "web-tier-external-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.internet_facing_lb_sg.id]
+  subnets            = [aws_subnet.public-web-az1.id, aws_subnet.public-web-az2.id]
+
+  tags = {
+    Environment = "dev"
+  }
+
+}
+
+resource "aws_lb_listener" "external-lb-tg-listener" {
+  load_balancer_arn = aws_lb.external-lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.external-lb-tg.arn
+  }
+}
+
+# Web Tier Launch Template
+resource "aws_launch_template" "web-tier-launch-template" {
+  name                   = "web-tier-launch-template"
+  description            = "Web Tier Launch Template Description"
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [aws_security_group.WebTierSG.id]
+  image_id               = aws_ami_from_instance.webtier-ami.id
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2-profile.name
+  }
+
+  depends_on = [
+    aws_iam_instance_profile.ec2-profile,
+    aws_security_group.WebTierSG,
+  ]
+
+}
+
+# Web Tier Auto Scaling Group
+resource "aws_autoscaling_group" "web-tier-auto-scalling-group" {
+  name                      = "Web-Tier-ASG"
+  max_size                  = 2
+  min_size                  = 2
+  health_check_grace_period = 300
+  health_check_type         = "ELB"
+  desired_capacity          = 2
+  force_delete              = true
+  vpc_zone_identifier       = [aws_subnet.public-web-az1.id, aws_subnet.public-web-az2.id]
+    # load_balancers            = [aws_lb.external-lb.id]
+  target_group_arns = [aws_lb_target_group.external-lb-tg.arn]
+
+  launch_template {
+    id      = aws_launch_template.web-tier-launch-template.id
+    version = "$Latest"
+  }
+}
+
+```
+
+Infrastructure Deployment
+
+    alias tf="terraform"
+    tf init
+    tf fmt
+    tf validate
+    tf plan
+    tf apply --auto-approve
+    tf destroy --auto-approve
+
+Thank You! :shipit:

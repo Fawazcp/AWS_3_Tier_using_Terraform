@@ -65,7 +65,7 @@ resource "aws_autoscaling_group" "web-tier-auto-scalling-group" {
   desired_capacity          = 2
   force_delete              = true
   vpc_zone_identifier       = [aws_subnet.public-web-az1.id, aws_subnet.public-web-az2.id]
-    # load_balancers            = [aws_lb.external-lb.id]
+  # load_balancers            = [aws_lb.external-lb.id]
   target_group_arns = [aws_lb_target_group.external-lb-tg.arn]
 
   launch_template {
