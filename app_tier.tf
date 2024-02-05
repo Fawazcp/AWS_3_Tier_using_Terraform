@@ -1,4 +1,4 @@
-# Define EC2 instance with IAM instance profile
+# Define App Tier EC2 instance with IAM instance profile
 resource "aws_instance" "app-tier" {
   ami                    = "ami-085648d85db272f29" # Replace with your desired AMI
   instance_type          = "t2.micro"

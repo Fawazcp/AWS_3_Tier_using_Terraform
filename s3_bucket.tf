@@ -18,3 +18,12 @@ resource "aws_s3_bucket_object" "files-upload-s3" {
 
   depends_on = [aws_s3_bucket.s3-bucket]
 }
+
+resource "aws_s3_bucket_object" "file_upload_s3_2" {
+  bucket = aws_s3_bucket.s3-bucket.id
+  key    = "nginx.conf"
+  source = "nginx.conf"
+  etag   = filemd5("nginx.conf")
+
+  depends_on = [aws_s3_bucket.s3-bucket]
+}
