@@ -27,3 +27,14 @@ resource "aws_s3_bucket_object" "file_upload_s3_2" {
 
   depends_on = [aws_s3_bucket.s3-bucket]
 }
+
+resource "aws_s3_bucket_object" "files-upload-s3_3" {
+
+  for_each = fileset("web-tier/", "*")
+  bucket   = aws_s3_bucket.s3-bucket.id
+  key      = "web-tier/${each.value}"
+  source   = "web-tier/${each.value}"
+  etag     = filemd5("web-tier/${each.value}")
+
+  depends_on = [aws_s3_bucket.s3-bucket]
+}
