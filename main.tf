@@ -8,12 +8,11 @@ terraform {
 
   required_version = ">= 1.2.0"
 
-  backend "remote" {
-    organization = "devopswithlasantha"
-
-    workspaces {
-      name = "3tierapptf-workspace"
-    }
+  backend "s3" {
+    bucket         = "terraform-3-tier-app-testdev"
+    key            = "terraform.tfstate"
+    region         = "us-west-2"
+    dynamodb_table = "terraform-3-tier-app-remote-db"
   }
 }
 
