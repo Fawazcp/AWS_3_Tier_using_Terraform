@@ -1,6 +1,6 @@
 # Define App Tier EC2 instance with IAM instance profile
 resource "aws_instance" "app-tier" {
-  ami                    = "ami-085648d85db272f29" # Replace with your desired AMI
+  ami                    = "ami-0d442a425e2e0a743" # Replace with your desired AMI
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.private-app-az1.id # Specify the private app subnet ID
   iam_instance_profile   = aws_iam_instance_profile.ec2-profile.name
@@ -9,7 +9,6 @@ resource "aws_instance" "app-tier" {
   user_data = <<-EOF
               #!/bin/bash
               sudo yum install mysql -y
-              sudo yum install -y amazon-ssm-agent
               curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
               source ~/.bashrc
               nvm install 16
