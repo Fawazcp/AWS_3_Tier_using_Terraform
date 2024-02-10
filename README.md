@@ -687,7 +687,10 @@ terraform apply -auto-approve
 
 ### App Tier Deployment
 
-In order create app tier ec2 first.
+In this section of our workshop we will create an EC2 instance for our app layer and make all necessary software configurations so that the app can run. The app layer consists of a Node.js application that will run on port 4000. We will also configure our database with some data and tables.
+
+In order create app tier ec2 first follow the below steps;
+
 ```
 # Create a new file named app_tier.tf and add the below resources
 
@@ -725,6 +728,16 @@ resource "aws_instance" "app-tier" {
   depends_on = [aws_iam_instance_profile.ec2-profile]
 }
 ```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
 Configure Database.
 
 ```
