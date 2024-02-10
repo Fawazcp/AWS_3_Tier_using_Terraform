@@ -738,7 +738,12 @@ terraform plan
 terraform apply -auto-approve
 ```
 
-Configure Database.
+If we go the console we can see the intance has been creted.
+
+![image](snapshots/15.png)
+
+Next, we need to connect the ec2 instance to configure Database.
+
 
 ```
 Connect App Tier EC@ via Session Manager & Run following commands
