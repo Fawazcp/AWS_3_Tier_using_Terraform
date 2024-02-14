@@ -766,6 +766,19 @@ SELECT * FROM transactions;
 
 ```
 
+##### Next, we need to configure our app instance
+
+The first thing we will do is update our database credentials for the app tier. To do this, open the **application-code/app-tier/DbConfig.js** file from the github repo in your favorite text editor on your computer. You’ll see empty strings for the **hostname, user, password and database**. Fill this in with the credentials you configured for your database, the writer endpoint of your database as the hostname, and webappdb for the database. Save the file.
+
+```
+module.exports = Object.freeze({
+    DB_HOST : 'DATABASE_ENDPOINT',
+    DB_USER : 'DATABASE_USERNAME',
+    DB_PWD : 'DBPASSWORD',
+    DB_DATABASE : 'webappdb'
+});
+```
+
 ## Step 5
 
 ### Create App Tier & Web Tier AMI
