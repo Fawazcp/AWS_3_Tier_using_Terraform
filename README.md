@@ -832,6 +832,8 @@ terraform apply -auto-approve
 
 ![image](snapshots/17.png)
 
+Next, we can create the load balancer. To do the add the below resources in the same file
+
 ```
 # AWS Load Balancer
 resource "aws_lb" "internal-lb" {
@@ -857,7 +859,17 @@ resource "aws_lb_listener" "internal-lb-tg-listener" {
     target_group_arn = aws_lb_target_group.internal-lb-tg.arn
   }
 }
+```
+```
+# save the file and execute the below command
 
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+# Continue from here
+```
 # App Tier Launch Template
 resource "aws_launch_template" "app-tier-launch-template" {
   name                   = "app-tier-launch-template"
@@ -876,7 +888,9 @@ resource "aws_launch_template" "app-tier-launch-template" {
   ]
 
 }
+```
 
+```
 # App Tier Auto Scaling Group
 resource "aws_autoscaling_group" "app-tier-auto-scalling-group" {
   name                      = "App-Tier-ASG"
