@@ -790,19 +790,18 @@ resource "aws_ami_from_instance" "apptier-ami" {
   name               = "apptier-image"
   source_instance_id = aws_instance.app-tier.id
   depends_on         = [aws_instance.app-tier]
+    tags = {
+    Name        = "App-Tier-ami"
+  }
 }
-
-resource "aws_ami_from_instance" "webtier-ami" {
-  name               = "webtier-image"
-  source_instance_id = aws_instance.web-tier.id
-  depends_on         = [aws_instance.web-tier]
-}
-
 ```
+![image](snapshots/16.png)
 
 ## Step 6
 
 ### Create Internal Load Balancer & Auto Scaling Group
+
+Once AMI has been created, we can go ahead and create our target group to use with the internal load balancer and also we will create an auto scaling group. First, we will create target group, to do that create new file named internal_lb_tg_asg.tf and follow the below steps;
 
 ```
 # Create a new file named internal_lb_tg_asg.tf and add the below resources
@@ -819,7 +818,21 @@ resource "aws_lb_target_group" "internal-lb-tg" {
   }
   depends_on = [aws_vpc.aws-vpc]
 }
+```
 
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+- Once the script has been executed go to the target group from the console and we can see the target group has been created.
+
+![image](snapshots/17.png)
+
+```
 # AWS Load Balancer
 resource "aws_lb" "internal-lb" {
   name               = "app-tier-internal-lb"
