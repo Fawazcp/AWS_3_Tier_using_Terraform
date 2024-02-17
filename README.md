@@ -950,6 +950,8 @@ Go to the console and we can see Autoscaling Group is created
 
 ### Web Tier Deployment
 
+In this section we will deploy an EC2 instance for the web tier and make all necessary software configurations for the NGINX web server and React.js website
+
 ```
 # Create a new file named web_tier.tf and add the below resources
 
@@ -961,6 +963,7 @@ resource "aws_instance" "web-tier" {
   iam_instance_profile   = aws_iam_instance_profile.ec2-profile.name
   vpc_security_group_ids = [aws_security_group.WebTierSG.id] # Reference the security group ID
   associate_public_ip_address = true
+  key_name               = "YOUR_KEY_NAME"
 
   user_data = <<-EOF
               #!/bin/bash
@@ -992,6 +995,21 @@ resource "aws_instance" "web-tier" {
 }
 
 ```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+- Go to ec2 console and we can see the web-tier instance has been created.
+
+![image](snapshots/21.png)
+
+# continue from here
 
 ## Step 8
 
