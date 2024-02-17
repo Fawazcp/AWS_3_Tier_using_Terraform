@@ -868,7 +868,13 @@ terraform fmt
 terraform plan
 terraform apply -auto-approve
 ```
-# Continue from here
+And if we go to the console we can see the load balancer created
+
+![image](snapshots/18.png)
+
+Next, we need to create a Launch template with the AMI we created earlier. 
+- To create launch template add the below resource in the same file
+
 ```
 # App Tier Launch Template
 resource "aws_launch_template" "app-tier-launch-template" {
@@ -891,6 +897,20 @@ resource "aws_launch_template" "app-tier-launch-template" {
 ```
 
 ```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+Now if we go to Launch template from the console we can see one launch template has been created
+
+![image](snapshots/19.png)
+
+We will now create the Auto Scaling Group for our app instances. To do that create a new file called asg.tf and follow the below steps;
+
+```
 # App Tier Auto Scaling Group
 resource "aws_autoscaling_group" "app-tier-auto-scalling-group" {
   name                      = "App-Tier-ASG"
@@ -911,6 +931,20 @@ resource "aws_autoscaling_group" "app-tier-auto-scalling-group" {
 }
 
 ```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+Go to the console and we can see Autoscaling Group is created
+
+![image](snapshots/20.png)
+
 
 ## Step 7
 
