@@ -53,31 +53,45 @@ Create another file named IAM role in the same folder and follow the below steps
 ```
 # add the below content inside this file
 
-resource "aws_iam_role" "ec2_instance_role" {
-  name = "ec2_instance_role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "ec2.amazonaws.com",
-        },
-      },
-    ],
-  })
+resource "aws_iam_role" "iamrole" {
+  name               = "iam-role-3-tier-app"
+  path               = "/"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  tags = {
+    Name        = "3TierApp"
+    Environment = "dev"
+  }
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_ssm_policy" {
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "attach_policy1" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = aws_iam_role.ec2_instance_role.name
+  role       = aws_iam_role.iamrole.name
+  depends_on = [aws_iam_role.iamrole]
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_s3_policy" {
+resource "aws_iam_role_policy_attachment" "attach_policy2" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-  role       = aws_iam_role.ec2_instance_role.name
+  role       = aws_iam_role.iamrole.name
+  depends_on = [aws_iam_role.iamrole]
+}
+
+resource "aws_iam_instance_profile" "ec2-profile" {
+  name       = "three-tier-ec2-profile"
+  role       = aws_iam_role.iamrole.name
+  depends_on = [aws_iam_role.iamrole]
 }
 ```
 
