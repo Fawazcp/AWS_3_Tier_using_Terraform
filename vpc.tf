@@ -15,7 +15,7 @@ resource "aws_vpc" "aws-vpc" {
 resource "aws_subnet" "public-web-az1" {
   vpc_id                  = aws_vpc.aws-vpc.id
   cidr_block              = "10.0.0.0/24"
-  availability_zone       = "us-west-2a"
+  availability_zone       = "us-east-2a"
   map_public_ip_on_launch = true
 
   tags = {
@@ -27,7 +27,7 @@ resource "aws_subnet" "public-web-az1" {
 resource "aws_subnet" "public-web-az2" {
   vpc_id                  = aws_vpc.aws-vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-west-2b"
+  availability_zone       = "us-east-2b"
   map_public_ip_on_launch = true
 
   tags = {
@@ -39,7 +39,7 @@ resource "aws_subnet" "public-web-az2" {
 resource "aws_subnet" "private-app-az1" {
   vpc_id            = aws_vpc.aws-vpc.id
   cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-west-2a"
+  availability_zone = "us-east-2a"
 
   tags = {
     Name        = "Private-App-Subnet-AZ-1"
@@ -50,7 +50,7 @@ resource "aws_subnet" "private-app-az1" {
 resource "aws_subnet" "private-app-az2" {
   vpc_id            = aws_vpc.aws-vpc.id
   cidr_block        = "10.0.3.0/24"
-  availability_zone = "us-west-2b"
+  availability_zone = "us-east-2b"
 
   tags = {
     Name        = "Private-App-Subnet-AZ-2"
@@ -61,7 +61,7 @@ resource "aws_subnet" "private-app-az2" {
 resource "aws_subnet" "private-db-az1" {
   vpc_id            = aws_vpc.aws-vpc.id
   cidr_block        = "10.0.4.0/24"
-  availability_zone = "us-west-2a"
+  availability_zone = "us-east-2a"
 
   tags = {
     Name        = "Private-Db-Subnet-AZ-1"
@@ -72,7 +72,7 @@ resource "aws_subnet" "private-db-az1" {
 resource "aws_subnet" "private-db-az2" {
   vpc_id            = aws_vpc.aws-vpc.id
   cidr_block        = "10.0.5.0/24"
-  availability_zone = "us-west-2b"
+  availability_zone = "us-east-2b"
 
   tags = {
     Name        = "Private-Db-Subnet-AZ-2"
