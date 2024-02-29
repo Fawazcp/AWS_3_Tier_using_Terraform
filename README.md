@@ -9,7 +9,7 @@
 ### Set UP
 
 
--	Download Code from Github or using the below URLon your local
+-	Download Code from Github or using the below URL on your local
 
 ```
 git clone https://github.com/aws-samples/aws-three-tier-web-architecture-workshop.git
@@ -100,6 +100,65 @@ Here we are creating an IAM role with 2 permissions. One is for Session manager 
 ```
 # save the file and execute the below command
 
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+#### Next we need to create S3 bucket for code repo
+- S3 Creation & Save Code Samples. Please use inside root folder
+
+![image](snapshots/22.png)
+
+Create another file named s3_bucket.tf in the same folder and follow the below steps;
+
+```
+resource "aws_s3_bucket" "s3-bucket" {
+  bucket = var.bucket_name
+
+  tags = {
+    Name        = "3TierApp"
+    Environment = "dev"
+  }
+}
+
+# Upload files to S3 bucket
+resource "aws_s3_bucket_object" "files-upload-s3" {
+
+  for_each = fileset("app-tier/", "*")
+  bucket   = aws_s3_bucket.s3-bucket.id
+  key      = "app-tier/${each.value}"
+  source   = "app-tier/${each.value}"
+  etag     = filemd5("app-tier/${each.value}")
+
+  depends_on = [aws_s3_bucket.s3-bucket]
+}
+
+resource "aws_s3_bucket_object" "file_upload_s3_2" {
+  bucket = aws_s3_bucket.s3-bucket.id
+  key    = "nginx.conf"
+  source = "nginx.conf"
+  etag   = filemd5("nginx.conf")
+
+  depends_on = [aws_s3_bucket.s3-bucket]
+}
+
+resource "aws_s3_bucket_object" "files-upload-s3_3" {
+
+  for_each = fileset("web-tier/", "*")
+  bucket   = aws_s3_bucket.s3-bucket.id
+  key      = "web-tier/${each.value}"
+  source   = "web-tier/${each.value}"
+  etag     = filemd5("web-tier/${each.value}")
+
+  depends_on = [aws_s3_bucket.s3-bucket]
+}
+
+```
+# Save the file and execute the below command
+
+```
 terraform vaidate
 terraform fmt
 terraform plan

@@ -96,6 +96,24 @@ resource "aws_security_group_rule" "PrivateinstanceSG_rule" {
   source_security_group_id = aws_security_group.internal-lb-sg.id
 }
 
+# resource "aws_security_group_rule" "PrivateinstanceSG_rule_ssm" {
+#   security_group_id        = aws_security_group.PrivateinstanceSG.id
+#   type                     = "ingress"
+#   from_port                = 443
+#   to_port                  = 443
+#   protocol                 = "tcp"
+#   cidr_blocks       = [aws_vpc.aws-vpc.cidr_block]
+# }
+
+# resource "aws_security_group_rule" "PrivateinstanceSG_rule_ssm" {
+#   security_group_id        = aws_security_group.PrivateinstanceSG.id
+#   type                     = "egress"
+#   from_port                = 443
+#   to_port                  = 443
+#   protocol                 = "tcp"
+#   cidr_blocks       = [aws_vpc.aws-vpc.cidr_block]
+# }
+
 # Security Group For RDS Database
 resource "aws_security_group" "database-sg" {
   name        = "database-sg"
