@@ -993,7 +993,7 @@ resource "aws_autoscaling_group" "app-tier-auto-scalling-group" {
   health_check_type         = "ELB"
   desired_capacity          = 2
   force_delete              = true
-  vpc_zone_identifier       = [aws_subnet.private_subnet_az1.id, aws_private_subnet_az2.id]
+  vpc_zone_identifier       = [aws_subnet.private_subnet_az1.id, aws_subnet.private_subnet_az2.id]
   #   load_balancers            = [aws_lb.internal-lb.id]
   target_group_arns = [aws_lb_target_group.internal-lb-tg.arn]
 
