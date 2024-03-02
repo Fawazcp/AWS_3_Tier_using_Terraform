@@ -914,7 +914,7 @@ resource "aws_lb" "internal-lb" {
   internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.internal-lb-sg.id]
-  subnets            = [aws_subnet.private-app-az1.id, aws_subnet.private-app-az2.id]
+  subnets            = [aws_subnet.private_subnet_az1.id, aws_subnet.private_subnet_az2.id]
 
   tags = {
     Environment = "dev"
