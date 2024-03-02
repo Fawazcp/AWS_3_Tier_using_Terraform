@@ -1024,6 +1024,16 @@ Go to the console and we can see Autoscaling Group is created
 ### Web Tier Deployment
 
 In this section we will deploy an EC2 instance for the web tier and make all necessary software configurations for the NGINX web server and React.js website
+Before creating web-tier ec2 instance we need make some changes in the nginx.conf file. Open the nginx.conf locally and make the below changes then re-upload this file in the s3 bucket
+
+```
+# open nginx.conf file and find the below content, under proxy_pass add the internal load balancer DNS we created before. (you can find the load balancer DNS from the console)
+
+        #proxy for internal lb
+        location /api/{
+                proxy_pass http://[REPLACE-WITH-INTERNAL-LB-DNS]:80/;
+        }
+```
 
 ```
 # Create a new file named web_tier.tf and add the below resources
