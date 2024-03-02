@@ -1092,7 +1092,6 @@ terraform apply -auto-approve
 
 ![image](snapshots/21.png)
 
-# continue from here
 
 ## Step 8
 
@@ -1115,6 +1114,8 @@ resource "aws_ami_from_instance" "web-tier-ami" {
 
 
 Once AMI has been created, we can go ahead and create our target group to use with the external load balancer and also we will create an auto scaling group. First, we will create target group, to do that create new file named external_lb_tg_asg.tf and follow the below steps;
+
+# Step 9
 
 ### External Load Balancer & Auto Scaling Group
 
@@ -1266,6 +1267,8 @@ Go to the console and we can see Autoscaling Group is created for the webtier
 we can also see 2 webtier instances has been created.
 
 # Congrats! You've Implemeneted a 3 Tier Web Architecture
+
+# Step 10
 
 ### Clean UP
 
