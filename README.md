@@ -1032,7 +1032,7 @@ In this section we will deploy an EC2 instance for the web tier and make all nec
 resource "aws_instance" "web-tier" {
   ami                    = "ami-085648d85db272f29" # Replace with your desired AMI
   instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.public-web-az1.id # Specify the private app subnet ID
+  subnet_id              = aws_subnet.public_subnet-az1.id # Specify the private app subnet ID
   iam_instance_profile   = aws_iam_instance_profile.ec2-profile.name
   vpc_security_group_ids = [aws_security_group.WebTierSG.id] # Reference the security group ID
   associate_public_ip_address = true
