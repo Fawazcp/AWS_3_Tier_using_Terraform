@@ -1,4 +1,4 @@
-# AWS-Three-Tier-App-Terraform
+F# AWS-Three-Tier-App-Terraform
 3 Tier App Deploy to AWS using Terraform
 
 ### Architectural Diagram
@@ -854,7 +854,7 @@ module.exports = Object.freeze({
 
 ## Step 5
 
-### Create App Tier & Web Tier AMI
+### Create App Tier AMI
 
 ```
 # Create a new file named ami.tf and add the below resources
@@ -1024,7 +1024,7 @@ Go to the console and we can see Autoscaling Group is created
 ### Web Tier Deployment
 
 In this section we will deploy an EC2 instance for the web tier and make all necessary software configurations for the NGINX web server and React.js website
-Before creating web-tier ec2 instance we need make some changes in the nginx.conf file. Open the nginx.conf locally and make the below changes then re-upload this file in the s3 bucket
+Before creating a web-tier ec2 instance we need to make some changes in the nginx.conf file. Open the nginx.conf locally and make the below changes then re-upload this file in the s3 bucket
 
 ```
 # open nginx.conf file and find the below content, under proxy_pass add the internal load balancer DNS we created before. (you can find the load balancer DNS from the console)
@@ -1096,6 +1096,26 @@ terraform apply -auto-approve
 
 ## Step 8
 
+### Create Web Tier AMI
+
+```
+# add the below resource in the ami.tf file
+
+resource "aws_ami_from_instance" "web-tier-ami" {
+  name               = "webtier-image"
+  source_instance_id = aws_instance.web-tier.id
+  depends_on         = [aws_instance.web-tier]
+    tags = {
+    Name        = "Web-Tier-ami"
+  }
+}
+```
+
+![image](snapshots/23.png)
+
+
+Once AMI has been created, we can go ahead and create our target group to use with the external load balancer and also we will create an auto scaling group. First, we will create target group, to do that create new file named external_lb_tg_asg.tf and follow the below steps;
+
 ### External Load Balancer & Auto Scaling Group
 
 ```
@@ -1106,21 +1126,39 @@ resource "aws_lb_target_group" "external-lb-tg" {
   name     = "external-lb-tg"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.aws-vpc.id
+  vpc_id   = aws_vpc.my_vpc.id
 
   health_check {
     path = "/health"
   }
-  depends_on = [aws_vpc.aws-vpc]
+  depends_on = [aws_vpc.my_vpc]
 }
 
+```
+
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+
+```
+- Once the script has been executed go to the target group from the console and we can see the target group has been created.
+
+![image](snapshots/24.png)
+
+Next, we can create the load balancer. To do the add the below resources in the same file
+
+```
 # AWS Load Balancer
 resource "aws_lb" "external-lb" {
   name               = "web-tier-external-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.internet_facing_lb_sg.id]
-  subnets            = [aws_subnet.public-web-az1.id, aws_subnet.public-web-az2.id]
+  subnets            = [aws_subnet.public_subnet_az1.id, aws_subnet.public_subnet_az2.id]
 
   tags = {
     Environment = "dev"
@@ -1138,14 +1176,33 @@ resource "aws_lb_listener" "external-lb-tg-listener" {
     target_group_arn = aws_lb_target_group.external-lb-tg.arn
   }
 }
+```
+```
+# save the file and execute the below command
 
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+
+```
+
+- And if we go to the console we can see the load balancer created
+
+![image](snapshots/25.png)
+
+Next, we need to create a Launch template with the AMI we created earlier.
+
+- To create launch template add the below resource in the same file
+
+```
 # Web Tier Launch Template
 resource "aws_launch_template" "web-tier-launch-template" {
   name                   = "web-tier-launch-template"
   description            = "Web Tier Launch Template Description"
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.WebTierSG.id]
-  image_id               = aws_ami_from_instance.webtier-ami.id
+  image_id               = aws_ami_from_instance.web-tier-ami.id
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2-profile.name
@@ -1157,7 +1214,23 @@ resource "aws_launch_template" "web-tier-launch-template" {
   ]
 
 }
+```
 
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+
+Now if we go to Launch template from the console we can see one launch template has been created
+
+![image](snapshots/26.png)
+
+We will now create the Auto Scaling Group for our webtier instances. To do that create a new file called asg.tf or add these resources in the same file and follow the below steps;
+```
 # Web Tier Auto Scaling Group
 resource "aws_autoscaling_group" "web-tier-auto-scalling-group" {
   name                      = "Web-Tier-ASG"
@@ -1167,7 +1240,7 @@ resource "aws_autoscaling_group" "web-tier-auto-scalling-group" {
   health_check_type         = "ELB"
   desired_capacity          = 2
   force_delete              = true
-  vpc_zone_identifier       = [aws_subnet.public-web-az1.id, aws_subnet.public-web-az2.id]
+  vpc_zone_identifier       = [aws_subnet.public_subnet_az1.id, aws_subnet.public_subnet_az2.id]
     # load_balancers            = [aws_lb.external-lb.id]
   target_group_arns = [aws_lb_target_group.external-lb-tg.arn]
 
@@ -1176,7 +1249,30 @@ resource "aws_autoscaling_group" "web-tier-auto-scalling-group" {
     version = "$Latest"
   }
 }
+```
 
+```
+# save the file and execute the below command
+
+terraform vaidate
+terraform fmt
+terraform plan
+terraform apply -auto-approve
+```
+Go to the console and we can see Autoscaling Group is created for the webtier
+
+![image](snapshots/27.png)
+
+we can also see 2 webtier instances has been created.
+
+# Congrats! You've Implemeneted a 3 Tier Web Architecture
+
+### Clean UP
+
+Just use the below command (make sure you are in the same folder where you have created all the terraform file) and wait for sometime to destory all the resources
+
+```
+terraform destroy -auto-approve
 ```
 
 Infrastructure Deployment
