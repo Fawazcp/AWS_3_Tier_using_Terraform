@@ -884,12 +884,12 @@ resource "aws_lb_target_group" "internal-lb-tg" {
   name     = "internal-lb-tg"
   port     = 4000
   protocol = "HTTP"
-  vpc_id   = aws_vpc.aws-vpc.id
+  vpc_id   = aws_vpc.my_vpc.id
 
   health_check {
     path = "/health"
   }
-  depends_on = [aws_vpc.aws-vpc]
+  depends_on = [aws_vpc.my_vpc]
 }
 ```
 
