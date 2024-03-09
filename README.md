@@ -1,4 +1,4 @@
-F# AWS-Three-Tier-App-Terraform
+# AWS-Three-Tier-App-Terraform
 3 Tier App Deploy to AWS using Terraform
 
 ### Architectural Diagram
