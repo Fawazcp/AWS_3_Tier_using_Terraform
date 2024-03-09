@@ -901,6 +901,19 @@ pm2 starup
 pm2 save
 ```
 
+Now let's run a couple tests to see if our app is configured correctly and can retrieve data from the database.
+
+```
+# run the below command to check the app is runnig
+curl http://localhost:4000/health
+```
+
+```
+#Next, test your database connection. we can do that by hitting the following endpoint locally:
+
+curl http://localhost:4000/transaction
+````
+
 
 
 ## Step 5
