@@ -775,24 +775,6 @@ resource "aws_instance" "app-tier" {
   iam_instance_profile   = aws_iam_instance_profile.ec2-profile.name
   vpc_security_group_ids = [aws_security_group.PrivateinstanceSG.id] # Reference the security group ID
 
-  user_data = <<-EOF
-              #!/bin/bash
-              sudo yum install mysql -y
-              sudo yum install -y amazon-ssm-agent
-              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-              source ~/.bashrc
-              nvm install 16
-              nvm use 16
-              npm install -g pm2   
-              cd ~/
-              aws s3 cp s3://s3-bucket-for-3-tier-app/app-tier/ app-tier --recursive
-              cd ~/app-tier
-              npm install
-              pm2 start index.js
-              pm2 startup
-              pm2 save
-            EOF
-
   tags = {
     Name        = "App-Tier-EC2"
     Environment = "dev"
@@ -1112,27 +1094,6 @@ resource "aws_instance" "web-tier" {
   associate_public_ip_address = true
   key_name               = "YOUR_KEY_NAME"
 
-  user_data = <<-EOF
-              #!/bin/bash
-              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-              source ~/.bashrc
-              nvm install 16
-              nvm use 16
-              cd ~/
-              aws s3 cp s3://s3-bucket-for-3-tier-app/web-tier/ web-tier --recursive
-              cd ~/web-tier
-              npm install 
-              npm run build
-              sudo amazon-linux-extras install nginx1 -y
-              cd /etc/nginx
-              ls
-              sudo rm nginx.conf
-              sudo aws s3 cp s3://s3-bucket-for-3-tier-app/nginx.conf .
-              sudo service nginx restart
-              chmod -R 755 /home/ec2-user
-              sudo chkconfig nginx on
-            EOF
-
   tags = {
     Name        = "Web-Tier-EC2"
     Environment = "dev"
@@ -1156,6 +1117,42 @@ terraform apply -auto-approve
 
 ![image](snapshots/21.png)
 
+Next, we need to install the some components like we did for the app-tier. To do that first we need to connect the instance using session manager.
+
+```
+# connect the instance and run the below command
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+source ~/.bashrc
+nvm install 16
+nvm use 16
+```
+- Next, we need to download the web-tier code from the s3 bucket 
+
+```
+cd ~/
+aws s3 cp s3://BUCKET_NAME/web-tier/ web-tier --recursive
+```
+
+```
+cd ~/web-tier
+npm install 
+npm run build
+```
+```
+sudo amazon-linux-extras install nginx1 -y
+```
+
+```
+cd /etc/nginx
+ls
+sudo rm nginx.conf
+sudo aws s3 cp s3://BUCKET_NAME/nginx.conf .
+
+sudo service nginx restart
+chmod -R 755 /home/ec2-user
+sudo chkconfig nginx on
+```
 
 ## Step 8
 
