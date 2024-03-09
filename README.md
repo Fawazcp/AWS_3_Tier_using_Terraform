@@ -494,7 +494,7 @@ resource "aws_security_group_rule" "internet_facing_lb_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["yourIP/32"]
+  cidr_blocks       = ["0.0.0.0/0"]
 }
 ```
 
@@ -532,7 +532,7 @@ resource "aws_security_group_rule" "WebTierSG_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["your_ip/32"]
+  cidr_blocks       = ["0.0.0.0/0"]
 }
 
 resource "aws_security_group_rule" "traffic_from_internet_facing-lb-sg" {
@@ -1327,7 +1327,7 @@ Go to the console and we can see Autoscaling Group is created for the webtier
 
 we can also see 2 webtier instances has been created.
 
-- Go to load balancer and copy the external load balancer DNS name and we can see our website is working 😎
+- Go to load balancer and copy the external load balancer DNS name and paste it in a new browser, we can see our website is working 😎
 
 ![image](snapshots/28.png)
 
