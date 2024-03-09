@@ -895,6 +895,12 @@ pm2 start index.js
 pm2 list
 ```
 
+```
+pm2 starup
+
+pm2 save
+```
+
 
 
 ## Step 5
