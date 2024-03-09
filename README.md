@@ -1327,6 +1327,10 @@ Go to the console and we can see Autoscaling Group is created for the webtier
 
 we can also see 2 webtier instances has been created.
 
+- Go to load balancer and copy the external load balancer DNS name and we can see our website is working 😎
+
+![image](snapshots/28.png)
+
 # Congrats! You've Implemeneted a 3 Tier Web Architecture
 
 # Step 10
