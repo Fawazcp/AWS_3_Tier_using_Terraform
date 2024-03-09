@@ -852,6 +852,51 @@ module.exports = Object.freeze({
 });
 ```
 
+Upload the app-tier folder to the S3 bucket. To do that we just need to apply terraform again once the file has been updated.
+
+- Go to app-tier terminal again, Now we need to install all of the necessary components to run our backend application. Start by installing NVM (node version manager).
+
+```
+# connect the instance and run the below command
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+source ~/.bashrc
+```
+
+```
+# Next, install a compatible version of Node.js and make sure it's being used
+
+nvm install 16
+nvm use 16
+```
+
+```
+npm install -g pm2   
+```
+
+Now we need to download our code from our s3 buckets onto our instance. In the command below, replace BUCKET_NAME with the name of the bucket you uploaded the app-tier folder to:
+
+```
+cd ~/
+aws s3 cp s3://BUCKET_NAME/app-tier/ app-tier --recursive
+```
+
+- Navigate to the app directory, install dependencies, and start the app with pm2.
+
+```
+cd ~/app-tier
+npm install
+pm2 start index.js
+```
+
+```
+# run the below command to verify app is running correctly
+
+pm2 list
+```
+
+
+
 ## Step 5
 
 ### Create App Tier AMI
