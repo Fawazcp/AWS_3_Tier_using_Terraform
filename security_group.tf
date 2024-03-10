@@ -14,7 +14,7 @@ resource "aws_security_group_rule" "internet_facing_lb_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["2.49.3.12/32"]
+  cidr_blocks       = ["2.51.85.23/32"]
 }
 
 
@@ -35,7 +35,7 @@ resource "aws_security_group_rule" "WebTierSG_ingress" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["2.49.3.12/32"]
+  cidr_blocks       = ["2.51.85.23/32"]
 }
 
 resource "aws_security_group_rule" "traffic_from_internet_facing-lb-sg" {
@@ -45,6 +45,15 @@ resource "aws_security_group_rule" "traffic_from_internet_facing-lb-sg" {
   to_port                  = 80
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.internet_facing_lb_sg.id
+}
+
+resource "aws_security_group_rule" "WebTierSG_OutBound_TCP" {
+  security_group_id = aws_security_group.WebTierSG.id
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
 }
 
 # Internal Load Balancer SG
@@ -84,7 +93,7 @@ resource "aws_security_group_rule" "PrivateinstanceSG_ingress" {
   from_port         = 4000
   to_port           = 4000
   protocol          = "tcp"
-  cidr_blocks       = ["2.49.3.12/32"]
+  cidr_blocks       = ["2.51.85.23/32"]
 }
 
 resource "aws_security_group_rule" "PrivateinstanceSG_rule" {
@@ -96,23 +105,15 @@ resource "aws_security_group_rule" "PrivateinstanceSG_rule" {
   source_security_group_id = aws_security_group.internal-lb-sg.id
 }
 
-# resource "aws_security_group_rule" "PrivateinstanceSG_rule_ssm" {
-#   security_group_id        = aws_security_group.PrivateinstanceSG.id
-#   type                     = "ingress"
-#   from_port                = 443
-#   to_port                  = 443
-#   protocol                 = "tcp"
-#   cidr_blocks       = [aws_vpc.aws-vpc.cidr_block]
-# }
+resource "aws_security_group_rule" "PrivateinstanceSG_OutBound_TCP" {
+  security_group_id = aws_security_group.PrivateinstanceSG.id
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
 
-# resource "aws_security_group_rule" "PrivateinstanceSG_rule_ssm" {
-#   security_group_id        = aws_security_group.PrivateinstanceSG.id
-#   type                     = "egress"
-#   from_port                = 443
-#   to_port                  = 443
-#   protocol                 = "tcp"
-#   cidr_blocks       = [aws_vpc.aws-vpc.cidr_block]
-# }
 
 # Security Group For RDS Database
 resource "aws_security_group" "database-sg" {
