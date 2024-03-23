@@ -712,7 +712,7 @@ resource "aws_rds_cluster" "cluster" {
   engine_version     = "8.0"
   cluster_identifier = "aurora-database"
   master_username    = "admin"
-  master_password    = "admin123"
+  master_password    = var.master_password
   database_name      = "my_database"
 
   db_subnet_group_name   = aws_db_subnet_group.database_subnet_group.name
