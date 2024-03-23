@@ -93,7 +93,7 @@ resource "aws_security_group_rule" "PrivateinstanceSG_ingress" {
   from_port         = 4000
   to_port           = 4000
   protocol          = "tcp"
-  cidr_blocks       = ["92.98.16.32/32"]
+  cidr_blocks       = ["92.97.97.250/32"]
 }
 
 resource "aws_security_group_rule" "PrivateinstanceSG_rule" {
@@ -109,8 +109,8 @@ resource "aws_security_group_rule" "PrivateinstanceSG_OutBound_TCP" {
   security_group_id = aws_security_group.PrivateinstanceSG.id
   type              = "egress"
   from_port         = 0
-  to_port           = 65535
-  protocol          = "tcp"
+  to_port           = 0
+  protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
