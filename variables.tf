@@ -19,3 +19,8 @@ variable "role_name" {
   type        = string
   default     = "iam-role-3-tier-app"
 }
+
+variable "master_password" {
+  description = "The master password for the RDS cluster"
+  default = "YOUR_DATABASE_PASSWORD"
+}
