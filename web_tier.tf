@@ -1,6 +1,6 @@
 # Define Web Tier EC2 instance with IAM instance profile
 resource "aws_instance" "web-tier" {
-  ami                         = "ami-07bff6261f14c3a45" # Replace with your desired AMI
+  ami                         = "ami-0c7843ce70e666e51" # Replace with your desired AMI
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public-web-az1.id # Specify the private app subnet ID
   iam_instance_profile        = aws_iam_instance_profile.ec2-profile.name

@@ -30,7 +30,7 @@ resource "aws_s3_bucket_object" "file_upload_s3_2" {
 
 resource "aws_s3_bucket_object" "files-upload-s3_3" {
 
-  for_each = fileset("web-tier/", "*")
+  for_each = fileset("web-tier/", "**/*")
   bucket   = aws_s3_bucket.s3-bucket.id
   key      = "web-tier/${each.value}"
   source   = "web-tier/${each.value}"

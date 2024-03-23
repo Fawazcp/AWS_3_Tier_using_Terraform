@@ -17,6 +17,14 @@ resource "aws_security_group_rule" "internet_facing_lb_ingress" {
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
+resource "aws_security_group_rule" "internet_facing_lb_egress" {
+  security_group_id = aws_security_group.internet_facing_lb_sg.id
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"] # Allow all traffic to all destinations
+}
 
 # Security Group For Web Tier
 resource "aws_security_group" "WebTierSG" {
@@ -76,6 +84,15 @@ resource "aws_security_group_rule" "traffic_to_internal_facing-lb-sg" {
   source_security_group_id = aws_security_group.WebTierSG.id
 }
 
+resource "aws_security_group_rule" "internal-lb-sg_egress" {
+  security_group_id = aws_security_group.internal-lb-sg.id
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"] # Allow all traffic to all destinations
+}
+
 # Security Group For Private Instance
 resource "aws_security_group" "PrivateinstanceSG" {
   name        = "PrivateinstanceSG"
@@ -133,4 +150,13 @@ resource "aws_security_group_rule" "database-sg_rule" {
   to_port                  = 3306
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.PrivateinstanceSG.id
+}
+
+resource "aws_security_group_rule" "database-sg_egress" {
+  security_group_id = aws_security_group.database-sg.id
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"] # Allow all traffic to all destinations
 }
